@@ -39,13 +39,11 @@ def convert(img, flo):
 
 
 def infer_raft(in_path, out_path):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='./models/raft-things.pth', help="restore checkpoint")
-    parser.add_argument('--path', default=in_path, help="dataset for evaluation")
-    parser.add_argument('--small', action='store_true', default=False, help='use small model')
-    parser.add_argument('--mixed_precision', action='store_true', default=False, help='use mixed precision')
-    parser.add_argument('--alternate_corr', action='store_true', default=False, help='use efficent correlation implementation')
-    args = parser.parse_args()
+    args = {'model': './models/raft-things.pth',
+            'path': in_path,
+            'small': False,
+            'mixed_precision': False,
+            'alternate_corr': False}
 
     model = torch.nn.DataParallel(RAFT(args))
     model.load_state_dict(torch.load(args.model))
@@ -55,8 +53,8 @@ def infer_raft(in_path, out_path):
     model.eval()
 
     with torch.no_grad():
-        images = glob.glob(os.path.join(args.path, '*.png')) + \
-                 glob.glob(os.path.join(args.path, '*.jpg'))
+        images = glob.glob(os.path.join(in_path, '*.png')) + \
+                 glob.glob(os.path.join(in_path, '*.jpg'))
 
         images = sorted(images)
         for i, imfile1, imfile2 in enumerate(zip(images[:-1], images[1:])):
